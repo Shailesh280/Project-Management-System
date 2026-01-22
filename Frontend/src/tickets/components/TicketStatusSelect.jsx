@@ -16,7 +16,12 @@ const EMPLOYEE_STATUSES = [
   { value: "PR_REVIEW", label: "PR Review" },
 ];
 
-export default function TicketStatusSelect({ ticket, user, loading, onChange }) {
+export default function TicketStatusSelect({
+  ticket,
+  user,
+  loading,
+  onChange,
+}) {
   if (!ticket || ticket.status === "DEPLOYED_DONE") return null;
 
   const options =
@@ -29,8 +34,12 @@ export default function TicketStatusSelect({ ticket, user, loading, onChange }) 
       value={ticket.status}
       options={options}
       loading={loading}
-      onChange={onChange}
       style={{ width: 220, marginBottom: 16 }}
+
+      onChange={(newStatus) => {
+        if (newStatus === ticket.status) return; // ⛔ prevent no-op
+        onChange(newStatus);
+      }}
     />
   );
 }

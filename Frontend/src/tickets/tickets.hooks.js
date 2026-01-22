@@ -70,8 +70,14 @@ export const useUpdateTicketStatus = () => {
       qc.invalidateQueries({ queryKey: ["tickets"] });
       qc.invalidateQueries({ queryKey: ["tickets", id] });
     },
+
+    onError: (err) => {
+      console.error("Status update failed:", err);
+      message.error("Failed to update status");
+    },
   });
 };
+
 
 export const useCreateTicket = () => {
   const qc = useQueryClient();

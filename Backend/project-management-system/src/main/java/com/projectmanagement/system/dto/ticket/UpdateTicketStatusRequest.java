@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class UpdateTicketStatusRequest {
-    private TicketStatus ticketStatus;
+    private TicketStatus status;
 }

@@ -7,6 +7,7 @@ import com.projectmanagement.system.entity.Ticket;
 import com.projectmanagement.system.mapper.TicketMapper;
 import com.projectmanagement.system.service.TicketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,11 +40,12 @@ public class TicketController {
     }
 
     @PutMapping("/{id}/status")
-    public void updateStatus(
+    public ResponseEntity<Void> updateTicketStatus(
             @PathVariable Long id,
             @RequestBody UpdateTicketStatusRequest request
     ) {
-        ticketService.updateTicketStatus(id, request.getTicketStatus());
+        ticketService.updateTicketStatus(id, request.getStatus());
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

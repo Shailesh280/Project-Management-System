@@ -17,10 +17,11 @@ export const createTicket = async (payload) => {
 
 export const updateTicketStatus = async ({ id, ticketStatus }) => {
   const { data } = await api.put(`/tickets/${id}/status`, {
-    ticketStatus,
+    status: ticketStatus,
   });
   return data;
 };
+
 
 export const deleteTicket = async (id) => {
   await api.delete(`/tickets/${id}`);

@@ -2,15 +2,17 @@ package com.projectmanagement.system.service;
 
 import com.projectmanagement.system.dto.ticket.CreateTicketRequest;
 import com.projectmanagement.system.entity.Ticket;
+import com.projectmanagement.system.entity.TicketStatusHistory;
 import com.projectmanagement.system.entity.User;
 import com.projectmanagement.system.entity.enums.Role;
 import com.projectmanagement.system.entity.enums.TicketStatus;
 import com.projectmanagement.system.exception.AccessDeniedException;
-import com.projectmanagement.system.exception.BadRequestException;
 import com.projectmanagement.system.exception.ResourceNotFoundException;
 import com.projectmanagement.system.repository.TicketRepository;
+import com.projectmanagement.system.repository.TicketStatusHistoryRepository;
 import com.projectmanagement.system.repository.UserRepository;
 import com.projectmanagement.system.security.SecurityUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final TicketStatusHistoryRepository ticketStatusHistoryRepository;
     private final UserRepository userRepository;
 
     public List<Ticket> getAllTickets() {
@@ -56,6 +59,7 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
+    @Transactional
     public void updateTicketStatus(Long ticketId, TicketStatus newStatus) {
 
         User currentUser = SecurityUtils.getCurrentUser();
@@ -63,29 +67,20 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
-        if (ticket.getStatus() == TicketStatus.DEPLOYED_DONE) {
-            throw new BadRequestException("Ticket already completed");
-        }
-
-        boolean isAdmin = currentUser.getRole() == Role.ADMIN;
-        boolean isAssignedEmployee =
-                currentUser.getRole() == Role.EMPLOYEE &&
-                        ticket.getAssignedTo().getId().equals(currentUser.getId());
-
-        if (!isAdmin && !isAssignedEmployee) {
-            throw new AccessDeniedException("You are not allowed to update this ticket");
-        }
-
-        if (currentUser.getRole() == Role.EMPLOYEE &&
-                (newStatus == TicketStatus.READY_TO_DEPLOY ||
-                        newStatus == TicketStatus.DEPLOYED_DONE)) {
-            throw new AccessDeniedException("Employee cannot move to this status");
+        if (ticket.getStatus() == newStatus) {
+            return;
         }
 
         ticket.setStatus(newStatus);
-        ticketRepository.save(ticket);
-    }
 
+        TicketStatusHistory history = TicketStatusHistory.builder()
+                .ticket(ticket)
+                .newStatus(newStatus)
+                .updatedBy(currentUser)
+                .build();
+
+        ticketStatusHistoryRepository.save(history);
+    }
 
 
 
