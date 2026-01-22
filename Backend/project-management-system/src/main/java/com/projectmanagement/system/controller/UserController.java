@@ -1,9 +1,11 @@
 package com.projectmanagement.system.controller;
 
+import com.projectmanagement.system.dto.user.ChangePasswordRequest;
 import com.projectmanagement.system.dto.user.UpdateProfileRequest;
 import com.projectmanagement.system.dto.user.UserProfileDto;
 import com.projectmanagement.system.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,5 +47,15 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void declineUser(@PathVariable Long id) {
         userService.declineUser(id);
+    }
+
+    // ✅ ADD THIS — ADMIN CHANGE USER PASSWORD
+    @PutMapping("/admin/{id}/password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void changeUserPassword(
+            @PathVariable Long id,
+            @RequestBody ChangePasswordRequest request
+    ) {
+        userService.updateUserPassword(id, request.getPassword());
     }
 }

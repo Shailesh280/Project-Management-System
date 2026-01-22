@@ -7,6 +7,7 @@ import com.projectmanagement.system.entity.enums.Role;
 import com.projectmanagement.system.exception.AccessDeniedException;
 import com.projectmanagement.system.exception.ResourceNotFoundException;
 import com.projectmanagement.system.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.projectmanagement.system.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder; // ✅ ADD THIS
 
     public List<UserProfileDto> getAllUsers() {
         requireAdmin();
@@ -38,6 +40,15 @@ public class UserService {
     public UserProfileDto getMyProfile() {
         User currentUser = SecurityUtils.getCurrentUser();
         return toDto(currentUser);
+    }
+
+    // ✅ THIS WILL NOW COMPILE
+    public void updateUserPassword(Long userId, String rawPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        userRepository.save(user);
     }
 
     public UserProfileDto updateMyProfile(UpdateProfileRequest request) {

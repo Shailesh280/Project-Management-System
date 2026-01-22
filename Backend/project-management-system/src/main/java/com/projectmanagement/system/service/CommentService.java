@@ -76,33 +76,53 @@ public class CommentService {
 
 
     public CommentDto addComment(AddCommentRequest request) {
-        Long currentUserId = SecurityUtils.getCurrentUser().getId();
 
+        User currentUser = SecurityUtils.getCurrentUser();
 
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        System.out.println(">>> [DEBUG] Logged-in user ID = " + currentUser.getId());
+        System.out.println(">>> [DEBUG] Logged-in username = " + currentUser.getUsername());
+        System.out.println(">>> [DEBUG] Logged-in role = " + currentUser.getRole());
 
         Ticket ticket = ticketRepository.findById(request.getTicketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
-        boolean isCreator = ticket.getCreatedBy().getId().equals(currentUserId);
+        System.out.println(">>> [DEBUG] Ticket ID = " + ticket.getId());
+        System.out.println(">>> [DEBUG] Ticket createdBy ID = " + ticket.getCreatedBy().getId());
+
+        if (ticket.getAssignedTo() == null) {
+            System.out.println(">>> [DEBUG] Ticket assignedTo = NULL");
+        } else {
+            System.out.println(">>> [DEBUG] Ticket assignedTo ID = " + ticket.getAssignedTo().getId());
+            System.out.println(">>> [DEBUG] Ticket assignedTo username = " + ticket.getAssignedTo().getUsername());
+        }
+
+        boolean isCreator = ticket.getCreatedBy().getId().equals(currentUser.getId());
         boolean isAssigned = ticket.getAssignedTo() != null &&
-                ticket.getAssignedTo().getId().equals(currentUserId);
-        boolean isAdmin = user.getRole().equals(Role.ADMIN);
+                ticket.getAssignedTo().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole() == Role.ADMIN;
+
+        System.out.println(">>> [DEBUG] isCreator = " + isCreator);
+        System.out.println(">>> [DEBUG] isAssigned = " + isAssigned);
+        System.out.println(">>> [DEBUG] isAdmin = " + isAdmin);
 
         if (!isCreator && !isAssigned && !isAdmin) {
+            System.out.println(">>> [DEBUG] COMMENT BLOCKED");
             throw new UnauthorizedException("You are not authorized to comment on this ticket");
         }
+
+        System.out.println(">>> [DEBUG] COMMENT AUTHORIZED");
 
         Comment comment = new Comment();
         comment.setContent(request.getContent());
         comment.setCreatedAt(LocalDateTime.now());
-        comment.setAuthor(user);
+        comment.setAuthor(currentUser);
         comment.setTicket(ticket);
-        comment.setTicketStatus(ticket.getStatus().name()); // <-- STORE STATUS
-
+        comment.setTicketStatus(ticket.getStatus().name());
 
         Comment saved = commentRepository.save(comment);
+        System.out.println(">>> [DEBUG] Comment saved with ID = " + saved.getId());
+
         return CommentMapper.toDto(saved);
     }
+
 }

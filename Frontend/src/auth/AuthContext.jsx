@@ -10,13 +10,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
+
     if (storedToken) {
       const parsed = parseJwt(storedToken);
 
       if (parsed?.sub && parsed?.role && parsed?.id) {
         setToken(storedToken);
         setUser({
-          id: parsed.id,
+          id: Number(parsed.id),   // ✅ force number
           email: parsed.sub,
           username: parsed.username,
           role: parsed.role,
@@ -25,17 +26,21 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
       }
     }
+
     setLoading(false);
   }, []);
 
   const login = (jwtToken) => {
     const parsed = parseJwt(jwtToken);
+
     setToken(jwtToken);
     setUser({
-      id: parsed.id,
+      id: Number(parsed.id),      // ✅ force number
       email: parsed.sub,
+      username: parsed.username,
       role: parsed.role,
     });
+
     localStorage.setItem("token", jwtToken);
   };
 
@@ -48,12 +53,13 @@ export const AuthProvider = ({ children }) => {
   const isAdmin =
     user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
 
+  if (loading) return null;
+
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
-        loading,
         login,
         logout,
         isAuthenticated: !!user,

@@ -7,7 +7,7 @@ import {
   useTicket,
   useUpdateTicketStatus,
   useAddComment,
-  useTicketComments
+  useTicketComments,
 } from "../tickets.hooks";
 
 import TicketStatusSelect from "../components/TicketStatusSelect";
@@ -29,10 +29,21 @@ export default function TicketDetails() {
   const { mutate: updateStatus, isLoading: updating } =
     useUpdateTicketStatus();
 
-  // ✅ FIXED — useAddComment no longer requires ticketId here
   const { mutate: addComment } = useAddComment();
 
-  if (isLoading || !ticket) return null;
+  if (isLoading || !ticket || !user) return null;
+
+  const allowComment = canComment({ user, ticket });
+
+  // ✅ DEBUG — VALID PLACEMENT
+  console.log("========== COMMENT DEBUG ==========");
+  console.log("user:", user);
+  console.log("ticket:", ticket);
+  console.log("ticket.assignedTo:", ticket.assignedTo);
+  console.log("user.id:", user.id);
+  console.log("assignedTo.id:", ticket.assignedTo?.id);
+  console.log("canComment():", allowComment);
+  console.log("===================================");
 
   return (
     <Card title={ticket.title}>
@@ -50,23 +61,23 @@ export default function TicketDetails() {
       )}
 
       <TicketComments
+        ticket={ticket}
         comments={comments}
-        ticket={ticket}   // <-- Add this
-        canComment={canComment({ user, ticket })}
-        onAdd={(content) => addComment({ ticketId: ticket.id, content })}
+        canComment={allowComment}
+        onAdd={(content) =>
+          addComment({ ticketId: ticket.id, content })
+        }
         onSelectComment={(comment) => {
           setSelectedComment(comment.id);
           setModalOpen(true);
         }}
-/>
-
+      />
 
       <CommentDetailsModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         commentId={selectedComment}
       />
-
     </Card>
   );
 }

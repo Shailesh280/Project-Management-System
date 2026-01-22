@@ -7,6 +7,7 @@ import {
   deleteUser,
   fetchMyProfile,
   updateMyProfile,
+  changeUserPassword, // 👈 ADD THIS
 } from "./users.api";
 
 /**
@@ -65,6 +66,20 @@ export const useDeleteUser = () => {
 
   return useMutation({
     mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["users"]);
+    },
+  });
+};
+
+/**
+ * ADMIN: CHANGE USER PASSWORD
+ */
+export const useChangeUserPassword = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: changeUserPassword,
     onSuccess: () => {
       queryClient.invalidateQueries(["users"]);
     },

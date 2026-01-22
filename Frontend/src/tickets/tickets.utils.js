@@ -31,7 +31,14 @@ export function canComment({ user, ticket }) {
 
   if (ticket.status === "DEPLOYED_DONE") return false;
 
-  if (user.role === "ADMIN" || user.role === "ROLE_ADMIN") return true;
+  const isAdmin =
+    user.role === "ADMIN" || user.role === "ROLE_ADMIN";
 
-  return ticket.assignedTo?.id === user.id;
+  if (isAdmin) return true;
+
+  if (!ticket.assignedTo) return false;
+
+  return (
+    Number(ticket.assignedTo.id) === Number(user.id)
+  );
 }

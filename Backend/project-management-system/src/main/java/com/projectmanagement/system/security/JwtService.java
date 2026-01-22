@@ -22,8 +22,10 @@ public class JwtService {
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getEmail()) // username
-                .claim("role", user.getRole().name()) // ADMIN / EMPLOYEE
+                .setSubject(user.getEmail())
+                .claim("id", user.getId())              // ✅ REQUIRED
+                .claim("username", user.getUsername()) // ✅ REQUIRED
+                .claim("role", user.getRole().name())
                 .setIssuedAt(new Date())
                 .setExpiration(
                         new Date(System.currentTimeMillis() + EXPIRATION_TIME)
@@ -31,6 +33,7 @@ public class JwtService {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
 
 
     public String extractUsername(String token) {

@@ -24,8 +24,14 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentDto> addComment(@RequestBody AddCommentRequest request) {
+
+        System.out.println(">>> [DEBUG] CommentController.addComment called");
+        System.out.println(">>> [DEBUG] ticketId = " + request.getTicketId());
+        System.out.println(">>> [DEBUG] content = " + request.getContent());
+
         return ResponseEntity.ok(commentService.addComment(request));
     }
+
 
     @GetMapping("/{id}/details")
     public ResponseEntity<CommentDetailsDto> getCommentDetails(@PathVariable Long id) {

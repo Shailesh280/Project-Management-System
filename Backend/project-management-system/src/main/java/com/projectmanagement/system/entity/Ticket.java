@@ -46,7 +46,7 @@ public class Ticket {
     private User createdBy;
 
     @ManyToOne
-    @JoinColumn(name = "assigned_to", nullable = false)
+    @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)

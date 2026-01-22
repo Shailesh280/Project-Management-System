@@ -6,5 +6,4 @@ export const USER_ROLES = {
 export const USER_STATUS = {
   PENDING: "PENDING",
   ACTIVE: "ACTIVE",
-  DECLINED: "DECLINED",
 };

@@ -38,19 +38,29 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        // --- FIX COMMENT ROUTES ---
+                        // --- USER SELF ACTIONS ---
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me").authenticated()
+
+                        // --- ADMIN USER MANAGEMENT ---
+                        .requestMatchers("/api/users/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users/pending").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/users/*/approve").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
+
+                        // --- COMMENTS ---
                         .requestMatchers(HttpMethod.GET, "/api/comments/*/details").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/comments/ticket/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/comments/**").authenticated()
 
-                        // Tickets
+                        // --- TICKETS ---
                         .requestMatchers("/api/tickets/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
