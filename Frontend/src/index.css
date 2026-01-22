@@ -1,0 +1,24 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.ticket-row-deployed {
+  background-color: #e8ffe8 !important;  /* light green background */
+  border-left: 6px solid #52c41a !important;  /* green left border */
+  transition: 0.2s;
+}
+
+.ticket-row-normal {
+  background-color: white;
+  border-left: 6px solid transparent;
+}
