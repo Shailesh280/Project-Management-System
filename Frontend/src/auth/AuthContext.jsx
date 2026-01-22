@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { parseJwt } from "./auth.utils";
+import api from "../services/apiClient";
 
 const AuthContext = createContext(undefined);
 
@@ -7,6 +8,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const refreshUser = async () => {
+    try {
+      const res = await api.get("/users/me");
+      setUser((prev) => ({
+        ...prev,
+        ...res.data, // includes displayPicture, bio, etc.
+      }));
+    } catch {
+      logout();
+    }
+  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -17,11 +30,14 @@ export const AuthProvider = ({ children }) => {
       if (parsed?.sub && parsed?.role && parsed?.id) {
         setToken(storedToken);
         setUser({
-          id: Number(parsed.id),   // ✅ force number
+          id: Number(parsed.id),
           email: parsed.sub,
           username: parsed.username,
           role: parsed.role,
+          displayPicture: null, 
         });
+
+        refreshUser();
       } else {
         localStorage.removeItem("token");
       }
@@ -30,18 +46,21 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (jwtToken) => {
+  const login = async (jwtToken) => {
     const parsed = parseJwt(jwtToken);
 
     setToken(jwtToken);
+    localStorage.setItem("token", jwtToken);
+
     setUser({
-      id: Number(parsed.id),      // ✅ force number
+      id: Number(parsed.id),
       email: parsed.sub,
       username: parsed.username,
       role: parsed.role,
+      displayPicture: null,
     });
 
-    localStorage.setItem("token", jwtToken);
+    await refreshUser(); 
   };
 
   const logout = () => {
@@ -62,6 +81,7 @@ export const AuthProvider = ({ children }) => {
         token,
         login,
         logout,
+        refreshUser,        
         isAuthenticated: !!user,
         isAdmin,
       }}

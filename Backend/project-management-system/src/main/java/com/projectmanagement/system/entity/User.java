@@ -8,7 +8,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -34,11 +35,15 @@ public class User {
     @Column(nullable = false)
     private boolean approved;
 
+    @Column(length = 500)
     private String bio;
 
-    @Column(name = "display_picture", nullable = false)
+    /*
+     * Stores only the file name (ex: abc123.jpg)
+     * Image is served from local filesystem
+     */
+    @Column(name = "display_picture")
     private String displayPicture;
-
 
     @OneToMany(mappedBy = "createdBy")
     private List<Ticket> createdTickets;

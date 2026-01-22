@@ -42,3 +42,31 @@ export function canComment({ user, ticket }) {
     Number(ticket.assignedTo.id) === Number(user.id)
   );
 }
+
+export const getStatusColor = (status) => {
+  switch (status) {
+    case "DEPLOYED_DONE":
+      return "green";
+    case "IN_PROGRESS":
+      return "blue";
+    case "PAUSED":
+      return "orange";
+    case "PR_REVIEW":
+      return "purple";
+    case "TODO":
+      return "default";
+    default:
+      return "cyan";
+  }
+};
+
+export const getRowClassByStatus = (status) => {
+  switch (status) {
+    case "DEPLOYED_DONE":
+      return "ticket-row-deployed";
+    case "PAUSED":
+      return "ticket-row-paused";
+    default:
+      return "ticket-row-normal";
+  }
+};

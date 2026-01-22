@@ -36,3 +36,33 @@
     transform: rotate(360deg);
   }
 }
+
+
+.dashboard-container {
+  padding: 24px;
+}
+
+.dashboard-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.dashboard-stat-card {
+  width: 100%;
+  border-radius: 14px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.dashboard-stat-title {
+  font-size: 15px !important;
+  color: #6b7280 !important;
+  margin-bottom: 8px !important;
+}
+
+.dashboard-stat-value {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+}

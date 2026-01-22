@@ -38,10 +38,14 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll() // ✅ ADD THIS
+
 
                         // --- USER SELF ACTIONS ---
                         .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me/password").authenticated()
+
 
                         // --- ADMIN USER MANAGEMENT ---
                         .requestMatchers("/api/users/admin/**").hasRole("ADMIN")

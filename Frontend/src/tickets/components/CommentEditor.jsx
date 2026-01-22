@@ -5,9 +5,7 @@ const modules = {
   toolbar: [
     [{ header: [1, 2, false] }],
     ["bold", "italic", "underline"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    ["link"],
-    ["clean"],
+    [{ list: "ordered" }, { list: "bullet" }]
   ],
 };
 
@@ -17,8 +15,7 @@ const formats = [
   "italic",
   "underline",
   "list",
-  "bullet",
-  "link",
+  "bullet"
 ];
 
 export default function CommentEditor({ value, onChange }) {

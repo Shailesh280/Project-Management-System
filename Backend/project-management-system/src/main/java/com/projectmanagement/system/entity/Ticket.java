@@ -11,7 +11,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "tickets")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -37,9 +38,13 @@ public class Ticket {
 
     private String attachments;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // ---- Relationships ----
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    // -------- RELATIONSHIPS --------
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
@@ -56,8 +61,17 @@ public class Ticket {
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
     private List<TicketStatusHistory> statusHistory;
 
+    // -------- TIMESTAMPS --------
+
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

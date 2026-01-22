@@ -7,19 +7,28 @@ import com.projectmanagement.system.entity.enums.Role;
 import com.projectmanagement.system.exception.AccessDeniedException;
 import com.projectmanagement.system.exception.ResourceNotFoundException;
 import com.projectmanagement.system.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.projectmanagement.system.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // ✅ ADD THIS
+    private final PasswordEncoder passwordEncoder;
+
+    /* ===================== ADMIN FUNCTIONS ===================== */
 
     public List<UserProfileDto> getAllUsers() {
         requireAdmin();
@@ -37,35 +46,11 @@ public class UserService {
                 .toList();
     }
 
-    public UserProfileDto getMyProfile() {
-        User currentUser = SecurityUtils.getCurrentUser();
-        return toDto(currentUser);
-    }
-
-    // ✅ THIS WILL NOW COMPILE
-    public void updateUserPassword(Long userId, String rawPassword) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        user.setPassword(passwordEncoder.encode(rawPassword));
-        userRepository.save(user);
-    }
-
-    public UserProfileDto updateMyProfile(UpdateProfileRequest request) {
-        User currentUser = SecurityUtils.getCurrentUser();
-
-        currentUser.setBio(request.getBio());
-        currentUser.setDisplayPicture(request.getDisplayPicture());
-
-        return toDto(userRepository.save(currentUser));
-    }
-
     public void approveUser(Long userId) {
         requireAdmin();
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setApproved(true);
         userRepository.save(user);
@@ -81,12 +66,71 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
+    /* ===================== USER PROFILE ===================== */
+
+    public UserProfileDto getMyProfile() {
+        User currentUser = SecurityUtils.getCurrentUser();
+        return toDto(currentUser);
+    }
+
+    public UserProfileDto updateMyProfile(UpdateProfileRequest request) {
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        if (request.getUsername() != null && !request.getUsername().isBlank()) {
+            currentUser.setUsername(request.getUsername());
+        }
+
+        currentUser.setBio(request.getBio());
+
+        if (request.getDisplayPicture() != null) {
+            currentUser.setDisplayPicture(request.getDisplayPicture());
+        }
+
+        return toDto(userRepository.save(currentUser));
+    }
+
+    /* ===================== PASSWORD ===================== */
+
+    // ADMIN: reset any user's password
+    public void updateUserPassword(Long userId, String rawPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        userRepository.save(user);
+    }
+
+    // USER: change own password (already authenticated)
+    public void changeMyPassword(String rawPassword) {
+        User currentUser = SecurityUtils.getCurrentUser();
+        currentUser.setPassword(passwordEncoder.encode(rawPassword));
+        userRepository.save(currentUser);
+    }
+
+    /* ===================== INTERNAL ===================== */
+
     private void requireAdmin() {
         User currentUser = SecurityUtils.getCurrentUser();
         if (currentUser.getRole() != Role.ADMIN) {
             throw new AccessDeniedException("Admin access required");
         }
     }
+
+    public String uploadProfilePicture(MultipartFile file) throws IOException {
+        User user = SecurityUtils.getCurrentUser();
+
+        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path uploadPath = Paths.get("uploads");
+
+        Files.createDirectories(uploadPath);
+        Files.copy(file.getInputStream(), uploadPath.resolve(filename));
+
+        user.setDisplayPicture(filename);
+        userRepository.save(user);
+
+        return filename;
+    }
+
 
     private UserProfileDto toDto(User user) {
         return new UserProfileDto(

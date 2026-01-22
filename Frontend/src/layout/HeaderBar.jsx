@@ -8,15 +8,9 @@ const { Text } = Typography;
 export default function HeaderBar() {
   const { user, logout } = useAuthContext();
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const menuItems = [
-    {
-      key: "profile",
-      label: "Profile",
-    },
     {
       key: "logout",
       icon: <LogoutOutlined />,
@@ -24,6 +18,10 @@ export default function HeaderBar() {
       onClick: logout,
     },
   ];
+
+  const profileImageUrl = user.displayPicture
+    ? `http://localhost:8080/uploads/${user.displayPicture}`
+    : null;
 
   return (
     <Header
@@ -35,10 +33,7 @@ export default function HeaderBar() {
         alignItems: "center",
       }}
     >
-      <Dropdown
-        menu={{ items: menuItems }}
-        placement="bottomRight"
-      >
+      <Dropdown menu={{ items: menuItems }} placement="bottomRight">
         <div
           style={{
             cursor: "pointer",
@@ -47,7 +42,11 @@ export default function HeaderBar() {
             gap: 8,
           }}
         >
-          <Avatar icon={<UserOutlined />} />
+          <Avatar
+            src={profileImageUrl}
+            icon={!profileImageUrl && <UserOutlined />}
+            style={{ objectFit: "cover" }}
+          />
           <Text>{user.username}</Text>
         </div>
       </Dropdown>

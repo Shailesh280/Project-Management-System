@@ -1,10 +1,13 @@
 package com.projectmanagement.system.dto.user;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class UpdateProfileRequest {
 
+    private String username;
     private String bio;
     private String displayPicture;
 }

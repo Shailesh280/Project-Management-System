@@ -9,13 +9,26 @@ import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    List<Ticket> findByAssignedToId(Long userId);
+    long countByAssignedToIdAndStatus(
+            Long userId,
+            TicketStatus status
+    );
 
-    long countByAssignedToId(Long userId);
+    long countByAssignedToIdAndStatusNot(
+            Long userId,
+            TicketStatus status
+    );
 
-    long countByAssignedToIdAndStatus(Long userId, TicketStatus status);
+    List<Ticket> findTop5ByAssignedToIdOrderByUpdatedAtDesc(Long userId);
 
-    long countByAssignedToIdAndStatusNot(Long userId, TicketStatus status);
+
+    long countByStatusNot(TicketStatus status);
+
+    long countByStatus(TicketStatus status);
+
+    long countByStatusIn(List<TicketStatus> statuses);
+
+    List<Ticket> findTop5ByOrderByUpdatedAtDesc();
 }
 
 

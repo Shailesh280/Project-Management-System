@@ -1,9 +1,11 @@
-import { Button, Card, Form, Input, Typography } from "antd";
+import { Button, Card, Form, Input, Typography, Space } from "antd";
+import { useNavigate } from "react-router-dom";
 import { useRegister } from "../auth/auth.hooks";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function Register() {
+  const navigate = useNavigate();
   const { mutate: register, isLoading } = useRegister();
 
   const onFinish = (values) => {
@@ -45,14 +47,27 @@ export default function Register() {
           <Input.Password />
         </Form.Item>
 
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={isLoading}
-          block
-        >
-          Register
-        </Button>
+        <Space direction="vertical" style={{ width: "100%" }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isLoading}
+            block
+          >
+            Register
+          </Button>
+
+          <Text style={{ textAlign: "center" }}>
+            Already have an account?{" "}
+            <Button
+              type="link"
+              onClick={() => navigate("/login")}
+              style={{ padding: 0 }}
+            >
+              Login
+            </Button>
+          </Text>
+        </Space>
       </Form>
     </Card>
   );

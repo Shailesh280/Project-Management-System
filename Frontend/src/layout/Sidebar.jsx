@@ -1,10 +1,11 @@
 import { Menu } from "antd";
 import {
   DashboardOutlined,
-  ProfileOutlined,
   UserOutlined,
   ClockCircleOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../auth/AuthContext";
 
@@ -13,19 +14,22 @@ export default function Sidebar() {
   const location = useLocation();
   const { user } = useAuthContext();
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  const dashboardPath =
+    user.role === "ADMIN"
+      ? "/admin/dashboard"
+      : "/employee/dashboard";
 
   const items = [
     {
-      key: "/tickets",
+      key: dashboardPath,
       icon: <DashboardOutlined />,
       label: "Dashboard",
     },
     {
       key: "/tickets",
-      icon: <ProfileOutlined />,
+      icon: <FileTextOutlined />,
       label: "Tickets",
     },
     {

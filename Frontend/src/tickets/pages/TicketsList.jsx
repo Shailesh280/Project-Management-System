@@ -3,6 +3,7 @@ import { Table, Tag, Button, Popconfirm, message } from "antd";
 import { useTickets, useDeleteTicket } from "../tickets.hooks";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../auth/AuthContext";
+import { getStatusColor, getRowClassByStatus } from "../tickets.utils";
 
 export default function TicketList() {
   const { data: tickets, isLoading } = useTickets();
@@ -10,7 +11,6 @@ export default function TicketList() {
   const navigate = useNavigate();
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
   const { mutate: deleteTicket } = useDeleteTicket();
 
   if (isLoading || !tickets) return null;
@@ -18,24 +18,17 @@ export default function TicketList() {
   const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
 
   const handleDelete = async () => {
-  if (selectedRowKeys.length === 0) {
-    message.warning("Select at least one ticket to delete");
-    return;
-  }
+    if (selectedRowKeys.length === 0) {
+      message.warning("Select at least one ticket to delete");
+      return;
+    }
 
-  const deletes = selectedRowKeys.map((id) =>
-    deleteTicket(id)
-  );
+    await Promise.all(selectedRowKeys.map((id) => deleteTicket(id)));
 
-  await Promise.all(deletes);
+    message.success("Selected tickets deleted successfully");
+    setSelectedRowKeys([]);
+  };
 
-  message.success("Selected tickets deleted successfully"); // ✅ ONE TOAST
-
-  setSelectedRowKeys([]);
-};
-
-
-  // Table columns
   const columns = [
     {
       title: "Title",
@@ -54,7 +47,9 @@ export default function TicketList() {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <Tag color={status === "DEPLOYED_DONE" ? "green" : "cyan"}>{status}</Tag>
+        <Tag color={getStatusColor(status)}>
+          {status}
+        </Tag>
       ),
     },
     {
@@ -76,7 +71,6 @@ export default function TicketList() {
 
   return (
     <div style={{ padding: "20px" }}>
-      {/* HEADER WITH BUTTONS */}
       <div
         style={{
           display: "flex",
@@ -87,14 +81,12 @@ export default function TicketList() {
         <h2>Tickets</h2>
 
         <div style={{ display: "flex", gap: "10px" }}>
-          {/* CREATE TICKET – only Admin */}
           {isAdmin && (
             <Button type="primary" onClick={() => navigate("/tickets/create")}>
               Create Ticket
             </Button>
           )}
 
-          {/* DELETE SELECTED – only Admin */}
           {isAdmin && selectedRowKeys.length > 0 && (
             <Popconfirm
               title="Delete Selected Tickets?"
@@ -109,7 +101,6 @@ export default function TicketList() {
         </div>
       </div>
 
-      {/* TABLE */}
       <Table
         dataSource={tickets}
         columns={columns}
@@ -124,9 +115,7 @@ export default function TicketList() {
             : null
         }
         rowClassName={(record) =>
-          record.status === "DEPLOYED_DONE"
-            ? "ticket-row-deployed"
-            : "ticket-row-normal"
+          getRowClassByStatus(record.status)
         }
       />
     </div>
